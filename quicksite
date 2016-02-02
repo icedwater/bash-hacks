@@ -1,0 +1,68 @@
+#! /usr/bin/env bash
+
+# Quicksite takes two arguments, site name, port number.
+# It uses these to define and enable a new site for nginx.
+# There should be a switch to delete existing sites.
+
+_usage () {
+    echo "Usage: quicksite [-h|--help|/?] [-c name port] [-d name port]"
+    exit 1
+}
+
+_create_site () {
+    # Here we have quicksite -c name port
+    NAME=$1
+    PORT=$2
+    SITEDIR=`pwd`;
+    echo "Creating new site $NAME ..."
+    cat > /tmp/site_$NAME <<EOF
+server {
+    listen $PORT;
+    listen [::]:$PORT;
+    server_name $NAME;
+    root $SITEDIR;
+    index index.html;
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+}
+EOF
+    # symlink into /etc/nginx/sites-available/
+    # Then from there into /etc/nginx/sites-enabled/
+    echo "Adding site to nginx config..."
+    sudo ln -s /tmp/site_$NAME /etc/nginx/sites-available/$NAME
+    sudo ln -s /etc/nginx/sites-available/$NAME /etc/nginx/sites-enabled
+    echo "Reloading nginx..."
+    sudo service nginx reload
+    echo "Access $NAME at localhost:$PORT."
+}
+
+_delete_site () {
+    # In this case we have quicksite -d name port
+    # Currently port is not used, but should be for error checks
+    NAME=$1
+    PORT=$2
+    echo "Removing config for $NAME ..."
+    rm /tmp/site_$NAME;
+    echo "Disabling site in nginx..."
+    sudo rm /etc/nginx/sites-enabled/$NAME;
+    sudo rm /etc/nginx/sites-available/$NAME;
+    echo "Reloading nginx..."
+    sudo service nginx reload
+    echo "The site $NAME at localhost:$PORT is gone."
+}
+
+case $1 in
+    -h|--help|\/?)
+        _usage
+        ;;
+    -c|--create)
+        _create_site $2 $3
+        ;;
+    -d|--delete)
+        _delete_site $2 $3
+        ;;
+    *)
+        echo "Uh-oh. Cowardly refusing to do anything."
+        ;;
+esac
