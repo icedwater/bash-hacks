@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+iwlist scan 2>/dev/null \
+    | sed 's#^ *##' \
+    | tr '\n' '\t' \
+    | sed 's#Cell#\n\nCell#g' \
+    | sed 's# - #: #' \
+    | sed 's#Cell \([0-9]*\):#Cell:\1\t#' \
+    | sed 's# Quality=#Quality:#' \
+    | sed 's#  Signal level=#\tSignal:#' \
+    | sed '1s#^$##;2,$s#^$##g' \
+    | sed '$s#$#\n#' \
+    | sed 's#Bit#\nBit#g' \
+    | sed 's#Channel#Ch#g' \
+    | sed 's#(Ch \([0-9]*\))##' \
+    | sed 's# GHz#GHz\t#;s# dBm#dBm\t#' \
+    | sed 's#  Encryption key#Encryption#' \
+    | sed 's#Address: #Address:#' \
+    | awk -F' ' "{print $1}" \
+    | grep -v Bit \
+    | grep Cell

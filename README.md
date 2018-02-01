@@ -9,6 +9,7 @@ haven't got round to checking them for security concerns yet.
 Right now, all that's here is:
 
   * quicksite
+  * whatfi
 
 ## quicksite
 
@@ -26,6 +27,16 @@ In other words, just run `quicksite -c foo 2919` to load your current directory
 as the site `foo`, accessible at `localhost:2919`. When you're done testing, it
 is a good idea to `quicksite -d foo 2919`. The port number is currently a check
 to remind myself I am deleting the right site `foo`, nothing more.
+
+## whatfi
+
+Whatfi scans for available wireless networks around your device so you can find
+one to connect to. Currently, the output is one line of text per network. Later
+on, the output will be a JSON list that can be transformed for other UI types.
+
+**Intended usage:**
+
+    whatfi                 # performs the iwlist scan and format the output
 
 ## Note
 
